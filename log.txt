@@ -3,3 +3,4 @@
 [2018-01-20] new year checkpoint
 [2018-07-04] summer review
 [2019-04-10] spring iteration
+[2019-10-15] year-end style wrap-up

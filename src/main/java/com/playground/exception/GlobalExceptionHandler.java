@@ -4,12 +4,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice
+/**
+ * JSON error payloads for {@link RestController} beans only — does not apply to MVC {@code @Controller}
+ * views (e.g. payment), which use {@link PaymentMvcExceptionHandler}.
+ *
+ * @see PaymentMvcExceptionHandler
+ * @see <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html">Controller advice</a>
+ */
+@RestControllerAdvice(annotations = RestController.class)
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(UserNotFoundException.class)
@@ -20,16 +28,6 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(DuplicateEmailException.class)
 	public ResponseEntity<ErrorResponse> handleDuplicateEmail(DuplicateEmailException ex) {
 		return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
-	}
-
-	@ExceptionHandler(InvalidPaymentAmountException.class)
-	public ResponseEntity<ErrorResponse> handleInvalidPaymentAmount(InvalidPaymentAmountException ex) {
-		return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-	}
-
-	@ExceptionHandler(InvalidTaxRateException.class)
-	public ResponseEntity<ErrorResponse> handleInvalidTaxRate(InvalidTaxRateException ex) {
-		return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

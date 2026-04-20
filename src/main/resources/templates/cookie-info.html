@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cookie info</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <style>
+      body.theme-light {
+        min-height: 100vh;
+        background: linear-gradient(160deg, #f8f9fa 0%, #e9ecef 100%);
+      }
+      body.theme-dark {
+        min-height: 100vh;
+        background: linear-gradient(160deg, #1a1d21 0%, #212529 100%);
+        color: #e9ecef;
+      }
+      body.theme-dark .alert-info {
+        background-color: #495057;
+        border-color: #6c757d;
+        color: #e9ecef;
+      }
+      body.theme-dark .table-responsive {
+        background-color: #343a40;
+      }
+      body.theme-dark .table {
+        color: #f8f9fa;
+        --bs-table-bg: transparent;
+      }
+      body.theme-dark .table thead th {
+        background-color: #495057;
+        color: #fff;
+      }
+      .table thead th {
+        background-color: #495057;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body
+    class="py-5"
+    th:classappend="${theme == 'dark'} ? ' theme-dark' : ' theme-light'"
+  >
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+          <h1 class="h3 mb-4 text-center">Cookie info (read-only)</h1>
+
+          <div class="alert alert-info">
+            <strong>Number of cookies:</strong>
+            <span th:text="${totalCookies}">0</span>
+          </div>
+
+          <div class="table-responsive shadow rounded overflow-hidden bg-white">
+            <table class="table table-bordered table-striped mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Cookie name</th>
+                  <th scope="col">Cookie value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:if="${#lists.isEmpty(cookies)}">
+                  <td colspan="2" class="text-center text-muted py-4">No cookies</td>
+                </tr>
+                <tr th:each="c : ${cookies}">
+                  <td th:text="${c.name}">name</td>
+                  <td th:text="${c.value}">value</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-center mt-4">
+            <a class="btn btn-primary" th:href="@{/cookie}">Back to cookie demo</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

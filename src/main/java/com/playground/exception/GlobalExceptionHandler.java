@@ -22,6 +22,16 @@ public class GlobalExceptionHandler {
 		return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
 	}
 
+	@ExceptionHandler(InvalidPaymentAmountException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidPaymentAmount(InvalidPaymentAmountException ex) {
+		return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(InvalidTaxRateException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidTaxRate(InvalidTaxRateException ex) {
+		return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
 		String message = ex.getBindingResult().getFieldErrors().stream()

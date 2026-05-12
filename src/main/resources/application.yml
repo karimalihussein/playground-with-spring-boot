@@ -17,6 +17,19 @@ spring:
 server:
   port: 8080
 
+# Educational benchmark module (REST JSON vs gRPC/protobuf).
+bench:
+  grpc:
+    # Second listener: gRPC over HTTP/2 (cleartext for local demos).
+    port: 9090
+  max-count: 500000
+  stream:
+    # Optional artificial pauses so students can *see* chunks arrive (0 = full speed).
+    server-chunk-delay-ms: 0
+    sse-event-delay-ms: 0
+
 logging:
   level:
     com.playground: INFO
+    # Flip to DEBUG for per-request payload logs during a lecture (noisy for big -n).
+    com.playground.bench: INFO

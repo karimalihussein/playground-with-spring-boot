@@ -1,6 +1,9 @@
 spring:
+  config:
+    activate:
+      on-profile: bench
   datasource:
-    url: jdbc:h2:mem:playground_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:bench_playground;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -11,8 +14,3 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-
-bench:
-  grpc:
-    # Avoid fixed-port collisions in CI: 0 = ephemeral; GrpcServerLifecycle logs actual port.
-    port: 0

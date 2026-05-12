@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Educational UI: dark “ops console” without enterprise chrome */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse 120% 80% at 20% 0%, #152238 0%, #0b0f14 45%, #07090c 100%);
+  color: #e8eef5;
+}
+
+/* Subtle grid — suggests “packet tracing” */
+.bg-grid {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.glass {
+  background: rgba(26, 35, 50, 0.72);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(120, 144, 180, 0.12);
+}

@@ -76,6 +76,38 @@ Clone the repo, configure your environment, and run the Spring Boot application 
 
 *(Use `mvnw.cmd` on Windows if applicable.)*
 
+### REST vs gRPC educational benchmarks
+
+This repo includes a small **bench module** (`com.playground.bench`) plus `docs/BENCHMARKING.md`:
+
+- REST: `GET /rest/unary/{count}` (JSON; load-test with **ApacheBench**)
+- gRPC: unary `GenerateNumbers` on **port `9090`** (load-test with **`GrpcBenchClient`** or `scripts/benchmark-grpc.sh`)
+
+Run without MySQL for class demos:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=bench
+```
+
+Open the in-app explainer: `http://localhost:8080/bench-guide.html`.
+
+**Streaming (SSE + gRPC):**
+
+- REST SSE: `GET /rest/stream/{count}` (alias: `/grpc/stream/{count}` on **port 8080** — not the gRPC server)  
+- gRPC: `GenerateNumbersStream`, `UploadNumbers`, `ChatStream` on **port 9090** — see `docs/BENCHMARKING.md` §9  
+
+```bash
+# REST/SSE with ApacheBench (measures completed responses, not each SSE event)
+ab -n 100 -c 10 http://localhost:8080/grpc/stream/1000
+
+# gRPC server streaming harness
+./mvnw -q exec:java -Dexec.mainClass=com.playground.bench.client.GrpcStreamingBenchClient \
+  -Dexec.args="-m server -p 9090 -s 16 -c 8 -k 5000"
+
+# Interactive bidirectional terminal demo
+./mvnw -q exec:java -Dexec.mainClass=com.playground.bench.client.GrpcStreamInteractiveDemo -Dexec.args="-p 9090"
+```
+
 ---
 
 ## Contribution

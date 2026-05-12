@@ -1,0 +1,55 @@
+// Educational NumberBench: unary + three streaming shapes over one gRPC service (one HTTP/2 connection,
+// many streams / messages — see docs/BENCHMARKING.md + gRPC core concepts).
+syntax = "proto3";
+
+package bench;
+
+option java_multiple_files = true;
+option java_package = "com.playground.bench.rpc.proto";
+option java_outer_classname = "NumbersProto";
+
+// Single service keeps the lesson small: compare unary vs server/client/bidi streaming in one place.
+service NumberBench {
+  // Unary: one request, one response on one gRPC message boundary.
+  rpc GenerateNumbers (GenerateNumbersRequest) returns (GenerateNumbersResponse);
+
+  // Server streaming: one request, many responses — classic “live feed” / “download in chunks”.
+  rpc GenerateNumbersStream (GenerateNumbersStreamRequest) returns (stream NumberChunk);
+
+  // Client streaming: many requests, one response — classic “upload / ingest stream, then ack”.
+  rpc UploadNumbers (stream NumberChunk) returns (UploadSummary);
+
+  // Bidirectional streaming: independent read/write halves — “chat”, tunnels, reactive pipelines.
+  rpc ChatStream (stream ChatMessage) returns (stream ChatMessage);
+}
+
+message GenerateNumbersRequest {
+  int32 count = 1;
+}
+
+message GenerateNumbersResponse {
+  int32 count = 1;
+  repeated int64 squares = 2;
+}
+
+message GenerateNumbersStreamRequest {
+  // Server emits count chunks: chunk i carries square (i+1)^2 (1-based index field).
+  int32 count = 1;
+}
+
+// One logical element in a streamed sequence (small messages => many HTTP/2 DATA frames under the hood).
+message NumberChunk {
+  int32 index = 1;
+  int64 square = 2;
+}
+
+message UploadSummary {
+  int32 received_count = 1;
+  int64 sum_squares = 2;
+}
+
+message ChatMessage {
+  string client_id = 1;
+  string text = 2;
+  int64 seq = 3;
+}

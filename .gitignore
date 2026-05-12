@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Protocol lab (Vite / npm) — install with: cd protocol-lab && npm ci
+protocol-lab/node_modules/
+protocol-lab/dist/

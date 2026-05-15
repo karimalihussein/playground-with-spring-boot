@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
-### Protocol lab (Vite / npm) — install with: cd protocol-lab && npm ci
-protocol-lab/node_modules/
-protocol-lab/dist/
+### Frontend (Vite / npm) — install with: cd frontend && npm install
+frontend/node_modules/
+
+### Backend (Maven)
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar

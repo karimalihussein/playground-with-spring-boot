@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>REST vs gRPC — instructor map</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 880px; line-height: 1.45; color: #102; }
+    code { background: #f3f4ff; padding: 0.1rem 0.3rem; border-radius: 4px; }
+    .callout { border-left: 4px solid #4f46e5; padding-left: 1rem; margin: 1rem 0; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>Educational map: REST vs gRPC in this repo</h1>
+  <p>
+    Open the code next to this page. The benchmark module lives in
+    <code>com.playground.bench</code> and uses one shared service:
+    <code>NumberBenchService</code> → <code>NumberGenerationCore.squares(count)</code>.
+  </p>
+
+  <h2>REST path (HTTP + JSON)</h2>
+  <ol>
+    <li>Browser or <code>ab</code> opens <strong>TCP</strong> to <code>localhost:8080</code>.</li>
+    <li>
+      Tomcat handles HTTP (often <strong>HTTP/1.1</strong> in local setups;
+      HTTP/2 for plain Spring MVC is a separate configuration story).
+    </li>
+    <li>
+      Spring MVC routes <code>GET /rest/unary/{count}</code> to
+      <code>UnaryNumbersRestController</code>.
+    </li>
+    <li>
+      Jackson (<code>tools.jackson.databind.ObjectMapper</code> in Spring Boot 4) turns
+      <code>NumbersJsonResponse</code> into <strong>UTF-8 JSON bytes</strong>.
+    </li>
+    <li>
+      The response body travels as <strong>text</strong>—human-readable, cache-friendly in some CDNs,
+      but heavier for big numeric arrays than Protobuf.
+    </li>
+  </ol>
+  <p class="callout">
+    Read: <a href="https://httpd.apache.org/docs/current/programs/ab.html">ApacheBench docs</a> ·
+    <a href="https://www.rfc-editor.org/rfc/rfc9110.html">HTTP Semantics (RFC 9110)</a>
+  </p>
+
+  <h2>gRPC path (HTTP/2 + Protobuf)</h2>
+  <ol>
+    <li>
+      <code>GrpcBenchClient</code> opens a <strong>ManagedChannel</strong> to
+      <code>localhost:9090</code> (plaintext for education).
+    </li>
+    <li>
+      gRPC sits on <strong>HTTP/2</strong>, so many calls can <strong>multiplex</strong> over
+      one connection using separate streams; see
+      <a href="https://www.rfc-editor.org/rfc/rfc9113.html">RFC 9113</a>.
+    </li>
+    <li>
+      Your unary method builds a <code>GenerateNumbersResponse</code> Protobuf message
+      (<code>NumberBenchGrpcService</code>).
+    </li>
+    <li>
+      The library emits <strong>binary</strong> frames (length-prefixed gRPC messages),
+      not a JSON string. Field tags + compact integer encodings dominate on the wire;
+      see <a href="https://protobuf.dev/programming-guides/encoding/">Protobuf Encoding</a>.
+    </li>
+  </ol>
+  <p class="callout">
+    Read: <a href="https://grpc.io/docs/what-is-grpc/core-concepts/">gRPC Core Concepts</a>
+  </p>
+
+  <h2>Streaming (visual mental model)</h2>
+  <ul>
+    <li>
+      <strong>REST unary</strong>: request → response → done (connection may be reused).
+    </li>
+    <li>
+      <strong>REST SSE</strong> (<code>/rest/stream/{n}</code> and alias <code>/grpc/stream/{n}</code> on port
+      <strong>8080</strong>): one HTTP response stays open; server pushes many <code>data:</code> lines —
+      still HTTP, not the gRPC protocol.
+    </li>
+    <li>
+      <strong>gRPC unary</strong>: one request message + one response message on one HTTP/2 stream for that RPC.
+    </li>
+    <li>
+      <strong>gRPC streaming</strong>: one HTTP/2 stream carries <em>many</em> Protobuf messages until half-close/complete —
+      compare server-stream, client-stream, and bidi in <code>NumberBenchGrpcService</code>.
+    </li>
+  </ul>
+  <p class="callout">
+    Read: <a href="https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md">gRPC over HTTP/2</a> ·
+    <a href="https://www.rfc-editor.org/rfc/rfc6455.html">WebSockets (RFC 6455)</a> (browser-native duplex, different framing)
+  </p>
+
+  <h2>Why people see higher gRPC throughput (not a law of physics)</h2>
+  <ul>
+    <li><strong>Smaller payloads</strong> for structured numeric data (JSON text is verbose).</li>
+    <li><strong>HTTP/2 multiplexing</strong> reduces connection churn and lifts concurrency.</li>
+    <li>
+      <strong>Head-of-line blocking at TCP</strong> still exists, but HTTP/2 avoids
+      <em>application-level</em> HOL blocking that naive HTTP/1.1 pipelining hit.
+    </li>
+    <li>
+      Your JVM still does work: serialization + business logic dominate for tiny payloads;
+      measure before declaring a winner.
+    </li>
+  </ul>
+
+  <p>
+    Full command cheat sheet: <code>docs/BENCHMARKING.md</code> in this repository.
+  </p>
+</body>
+</html>
